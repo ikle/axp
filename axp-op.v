@@ -111,4 +111,53 @@ module axp_shifter (
 	axp_zapnot Z (s, m, y);
 endmodule
 
+/* opcode 08-0F and 2x, address and mask calculation */
+
+module axp_addr (
+	input  [31:0] cmd, input branch, input ldah, input [63:0] base,
+	output [63:0] addr, output [7:0] mask
+);
+	wire [5:0] op = cmd[31:26];
+
+	wire [63:0] disp_m = {{48 {cmd[15]}}, cmd[15:0]};
+	wire [63:0] disp_b = {{41 {cmd[20]}}, cmd[20:0], 2'b0};
+	wire [63:0] disp   = branch ? disp_b : ldah ? disp_m << 16 : disp_m;
+
+	assign addr = base + disp;
+
+	assign mask = op[5] ? op[0] ? 8'hFF : 8'h0F :	/* 2x - ld/st	*/
+			      op[1] ? op[0] ? 8'hFF : 8'h01 : 8'h03;
+endmodule
+
+/* opcode 3x, branch logic */
+
+module axp_branch (
+	input  [31:0] cmd, input [63:0] a, input [63:0] pc,
+	output [63:0] addr
+);
+	wire [5:0] op = cmd[31:26];
+
+	wire lbc  = op[3] ? ~a[0] : 1;			/* 08 - lbc/abs	*/
+	wire eq   = op[0] ? ~|a, lbc;			/* 01 - eq/lbc	*/
+	wire le   = op[1] & a[63] | eq;			/* 02 - lt	*/
+	wire cond = op[2] ? ~le : le;			/* 04 - invert	*/
+
+	wire [63:0] next;
+
+	axp_addr A (cmd, 1'b1, 1'b0, pc, next, );
+
+	assign addr = cond ? next : pc;
+endmodule
+
+/* opcode 08 and 09: LDA and LDAH */
+
+module axp_lda (
+	input  [31:0] cmd, input [63:0] b,
+	output [63:0] r
+);
+	wire [5:0] op = cmd[31:26];
+
+	axp_addr A (cmd, 1'b0, op[0], b, r, );		/* 01 - ldah	*/
+endmodule
+
 `endif  /* AXP_OP_V */
