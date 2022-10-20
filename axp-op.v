@@ -32,4 +32,31 @@ module axp_adder (
 	assign y = f[2] ? (ult | eq | lt) : ss;		/* 04 - cmp	*/
 endmodule
 
+/* opcode 11, bitwise operations and conditional move (w/o amask/implver) */
+
+module axp_logic (
+	input  [31:0] cmd, input [63:0] a, input [63:0] b, input [63:0] c,
+	output [63:0] y
+);
+	wire [6:0] f = cmd[11:5];
+
+	wire [63:0] bb = f[3] ? ~b : b;			/* 08 - invert	*/
+
+	/* in xor branch: add amask (x61) and implver (x6c) */
+
+	wire [63:0] bitop = f[6] ? a ^ bb :		/* 40 - xor	*/
+			    f[5] ? a | bb : a & bb;	/* 20 - or	*/
+
+	wire lt   = f[6] & a[63];			/* 40 - lt	*/
+	wire eq   = f[5] & ~|a;				/* 20 - eq	*/
+	wire lbs  = f[4] ? a[0] : eq | lt;		/* 10 - lbs	*/
+
+	wire inv  = f[1] & (f[2] | ~f[4]);
+	wire cond = inv ^ lbs;
+
+	wire [63:0] cmov = cond ? b : c;
+
+	assign y = (f[2] | f[1]) ? cmov : bitop;	/* 02/04 - cmov	*/
+endmodule
+
 `endif  /* AXP_OP_V */
