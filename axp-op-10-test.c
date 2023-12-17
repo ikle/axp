@@ -23,11 +23,6 @@ static inline char mp_digit_adc (uint64_t *r, uint64_t x, uint64_t y, int c)
 	return c + mp_digit_add (r, x, a);
 }
 
-static inline int32_t sext (int64_t x)
-{
-	return (x << 32) >> 32;
-}
-
 /* opcode 10, adder and comparator (w/o cmpbge) */
 
 static inline uint64_t axp_adder (int f, uint64_t a, uint64_t b)
@@ -39,7 +34,7 @@ static inline uint64_t axp_adder (int f, uint64_t a, uint64_t b)
 
 	uint64_t sum;
 	int     co = mp_digit_adc (&sum, ass, bb, cin);
-	int64_t ss = (f & 0x20) ? sum : sext (sum);	/* 20 - !sext	*/
+	int64_t ss = (f & 0x20) ? sum : (int32_t) sum;	/* 20 - !sext	*/
 
 	int lt  = (f & 0x40) && (sum <  0);		/* 40 - lt	*/
 	int eq  = (f & 0x20) && (sum == 0);		/* 20 - eq	*/
