@@ -1,7 +1,7 @@
 /*
  * AXP opcode 10 test
  *
- * Copyright (c) 2021-2022 Alexei A. Smekalkine <ikle@ikle.ru>
+ * Copyright (c) 2021-2023 Alexei A. Smekalkine <ikle@ikle.ru>
  *
  * SPDX-License-Identifier: BSD-2-Clause
  */
@@ -9,11 +9,19 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include <x86intrin.h>
+static inline char mp_digit_add (uint64_t *r, uint64_t x, uint64_t y)
+{
+	*r = x + y;
+	return *r < x;
+}
 
-#define _addcarry_u64	__builtin_ia32_addcarryx_u64
+static inline char mp_digit_adc (uint64_t *r, uint64_t x, uint64_t y, int c)
+{
+	uint64_t a;
 
-#define mp_digit_adc(r, x, y, c)  _addcarry_u64  ((c), (x), (y), (void *) (r))
+	c = mp_digit_add (&a, y, c);
+	return c + mp_digit_add (r, x, a);
+}
 
 static inline int32_t sext (int64_t x)
 {
@@ -29,7 +37,7 @@ static inline uint64_t axp_adder (int f, uint64_t a, uint64_t b)
 	uint64_t ass = (f & 0x02) ? (as << 2) : a;	/* 02 - shift 2	*/
 	uint64_t bb  = (f & 0x08) ? ~b : b;		/* 08 - invert	*/
 
-	int64_t sum;
+	uint64_t sum;
 	int     co = mp_digit_adc (&sum, ass, bb, cin);
 	int64_t ss = (f & 0x20) ? sum : sext (sum);	/* 20 - !sext	*/
 
