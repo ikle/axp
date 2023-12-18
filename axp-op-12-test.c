@@ -9,27 +9,170 @@
 #include <stdint.h>
 #include <stdio.h>
 
-uint64_t zapnot (uint64_t x, unsigned mask)
+static inline uint64_t axp_srl (uint64_t a, uint64_t b)
 {
-	size_t i;
-	uint64_t m, bm;
-
-	for (i = 0, m = 0, bm = 0xff; i < 8; ++i, bm <<= 8)
-		if ((mask & (1 << i)) != 0)
-			m |= bm;
-
-	return x & m;
+	return a >> (b & 63);
 }
 
-static inline unsigned make_mask_v1 (int f)
+static inline uint64_t axp_sll (uint64_t a, uint64_t b)
 {
-	unsigned m = 0x01;
+	return a << (b & 63);
+}
 
-	m |= (f & 0x30) ? 0x03 : 0;
-	m |= (f & 0x20) ? 0x0f : 0;
-	m |= ((f & 0x30) == 0x30) ? 0xff : 0;
+static inline uint64_t axp_sra (int64_t a, uint64_t b)
+{
+	return a >> (b & 63);
+}
 
-	return m;
+static uint64_t axp_zap (uint64_t x, unsigned mask)
+{
+	uint64_t m, bm;
+	int i;
+
+	for (m = 0, bm = 0xff, i = 1; i < 0x100; bm <<= 8, i <<= 1)
+		if ((mask & i) != 0)
+			m |= bm;
+
+	return x & ~m;
+}
+
+static unsigned axp_byte_mask (int f)
+{
+	switch (f & 0x30) {
+	case 0x00:  return 0x0001;
+	case 0x10:  return 0x0003;
+	case 0x20:  return 0x000f;
+	default:    return 0x00ff;
+	}
+}
+
+uint64_t axp_msk_0 (int f, uint64_t a, uint64_t b)
+{
+#if 0
+	unsigned bs = b & 7;
+	unsigned m  = axp_byte_mask (f) << bs;
+	unsigned sm = (f & 0x40) ? m >> 8 : m;
+#else
+	unsigned m  = axp_byte_mask (f);
+	unsigned bs = b & 7;
+	unsigned bn = (f & 0x40) ? 8 - bs      : bs;
+	unsigned sm = (f & 0x40) ? m >> bn     : m << bn;
+#endif
+	return axp_zap (a, sm);
+}
+
+uint64_t axp_ins_0 (int f, uint64_t a, uint64_t b)
+{
+#if 0
+	unsigned bs = b & 7;
+	unsigned m  = axp_byte_mask (f) << bs;
+	unsigned sm = (f & 0x40) ? m >> 8      : m;
+	unsigned bl = (f & 0x40) ? 64 - bs * 8 : bs * 8;
+	uint64_t as = (f & 0x40) ? a >> bl     : a << bl;
+#else
+	unsigned m  = axp_byte_mask (f);
+	unsigned bs = b & 7;
+	unsigned bn = (f & 0x40) ? 8 - bs      : bs;
+	unsigned sm = (f & 0x40) ? m >> bn     : m << bn;
+	uint64_t as = (f & 0x40) ? a >> bn * 8 : a << bn * 8;
+#endif
+	return axp_zap (as, ~sm);
+}
+
+uint64_t axp_ext_0 (int f, uint64_t a, uint64_t b)
+{
+	unsigned m  = axp_byte_mask (f);
+	unsigned bs = b & 7;
+#if 0
+	unsigned bl = (f & 0x40) ? 64 - bs * 8 : bs * 8;
+	uint64_t as = (f & 0x40) ? a << bl     : a >> bl;
+#else
+	unsigned bn = (f & 0x40) ? 8 - bs      : bs;
+	uint64_t as = (f & 0x40) ? a << bn * 8 : a >> bn * 8;
+#endif
+	return axp_zap (as, ~m);
+}
+
+static inline uint64_t axp_sr (int f, uint64_t a, uint64_t b)
+{
+	switch (f & 0x0c) {
+	case 0x00:  return a;
+	case 0x04:  return axp_srl (a,  b);
+	case 0x08:  return axp_sll (a,  b);
+//	case 0x08:  return axp_sll (a, -b);	/* srl overflow word	*/
+	default:    return axp_sra (a,  b);
+	}
+}
+
+static uint64_t axp_bop (int f, uint64_t a, uint64_t b, int y, int inv)
+{
+	unsigned m  = axp_byte_mask (f);
+	unsigned bn = (f & 0x40) ? -b : b;
+	unsigned sm = (f & 0x40) ? m >> (bn & 7) : m << (bn & 7);
+	uint64_t as = axp_sr (f, a, bn * 8);
+
+	unsigned ms = y ? sm : m;
+
+	return axp_zap (as, inv ? ~ms : ms);
+}
+
+static uint64_t axp_msk (int f, uint64_t a, uint64_t b)
+{
+	return axp_bop (f, a, b, 1, 0);
+}
+
+static uint64_t axp_ins (int f, uint64_t a, uint64_t b)
+{
+	return axp_bop (f, a, b, 1, 1);
+}
+
+static uint64_t axp_ext (int f, uint64_t a, uint64_t b)
+{
+	return axp_bop (f, a, b, 0, 1);
+}
+
+static uint64_t axp_shift (int f, uint64_t a, uint64_t b, uint64_t c)
+{
+	switch (f & 0x0f) {
+	case 0x00:  return axp_zap (   a,  b);
+	case 0x01:  return axp_zap (   a, ~b);
+	case 0x02:  return axp_msk (f, a,  b);
+//	case 0x03:
+	}
+
+	switch (f & 0x4f) {
+	case 0x04:  return axp_sr  (f, a,  b);		/* 00    */  // srl
+	case 0x05:  return axp_sr  (f, a, ~b + 1);	/* 11 -b */  // sll.high
+	case 0x06:  return axp_ext (f, a,  b);		/* 00    */
+	case 0x07:  return axp_ins (f, a, ~b + 1);	/* 11 -b */
+
+	case 0x08:  return axp_sr  (f, a, ~b + 1);	/* 11 -b */  // srl.frac
+	case 0x09:  return axp_sr  (f, a,  b);		/* 00    */  // sll
+	case 0x0a:  return axp_ext (f, a, ~b + 1);	/* 11 -b */
+	case 0x0b:  return axp_ins (f, a,  b);		/* 00    */
+
+	case 0x0c:  return axp_sr  (f, a,  b);		/* 00    */
+	case 0x0d:  return axp_sr  (f, a, ~b + 1);	/* 11 -b */
+	case 0x0e:  return axp_ext (f, a,  b);		/* 00    */
+//	case 0x0f:
+
+	case 0x44:  return axp_sr  (f, a,  b + 1);	/* 01    */
+	case 0x45:  return axp_sr  (f, a, ~b + 1);	/* 11 -b */
+//	case 0x46:  return axp_ext (f, a, ~b + 1);	/* 11 -b */  // wrong mask
+	case 0x47:  return axp_ins (f, a,  b);		/* 00    */
+
+	case 0x48:  return axp_sr  (f, a, ~b + 1);	/* 11 -b */
+	case 0x49:  return axp_sr  (f, a,  b + 1);	/* 01    */
+	case 0x4a:  return axp_ext (f, a,  b);		/* 00    */
+//	case 0x4b:  return axp_ins (f, a, ~b + 1);	/* 11 -b */  // wrong mask
+
+	case 0x4c:  return axp_sr  (f, a,  b);		/* 00    */  // sra
+	case 0x4d:  return axp_sr  (f, a, ~b);		/* 10    */
+//	case 0x4e:
+//	case 0x4f:
+	}
+
+	return c;
 }
 
 static inline unsigned get_mask (int f, uint64_t b)
@@ -122,7 +265,9 @@ int main (int argc, char *argv[])
 	for (op = 0; op < 0x80; ++op) {
 		s = shift (op, a, b);
 		m = get_mask (op, b);
-		c = zapnot (s, m);
+		c = axp_zap (s, ~m);
+
+		c = axp_shift (op, a, b, c);
 
 //		printf ("%2X %016lx %02lx\n", op, c, m & 0xff);
 		printf ("%2X %016lx\n", op, c);
