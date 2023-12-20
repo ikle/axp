@@ -98,18 +98,22 @@ static inline uint64_t axp_sr (int f, uint64_t a, uint64_t b)
 	switch (f & 0x0c) {
 	case 0x00:  return a;
 	case 0x04:  return axp_srl (a,  b);
-	case 0x08:  return axp_sll (a,  b);
-//	case 0x08:  return axp_sll (a, -b);	/* srl overflow word	*/
+	case 0x08:  return axp_sll (a, -b);  /* srl/sra overflow word */
 	default:    return axp_sra (a,  b);
 	}
 }
 
-static uint64_t axp_bop (int f, uint64_t a, uint64_t b, int y, int inv)
+static inline uint64_t axp_ins_pm (int f, uint64_t a, uint64_t b)
+{
+	return axp_sr (f, axp_zap (a, ~axp_byte_mask (f)), b * 8);
+}
+
+static
+uint64_t axp_bop (int f, uint64_t a, uint64_t b, uint64_t bm, int y, int inv)
 {
 	unsigned m  = axp_byte_mask (f);
-	unsigned bn = (f & 0x40) ? -b : b;
-	unsigned sm = (f & 0x40) ? m >> (bn & 7) : m << (bn & 7);
-	uint64_t as = axp_sr (f, a, bn * 8);
+	unsigned sm = (f & 0x40) ? m >> (-bm & 7) : m << (bm & 7);
+	uint64_t as = axp_sr (f, a, b * 8);
 
 	unsigned ms = y ? sm : m;
 
@@ -118,21 +122,23 @@ static uint64_t axp_bop (int f, uint64_t a, uint64_t b, int y, int inv)
 
 static uint64_t axp_msk (int f, uint64_t a, uint64_t b)
 {
-	return axp_bop (f, a, b, 1, 0);
+	return axp_bop (f, a, b, b, 1, 0);
 }
 
-static uint64_t axp_ins (int f, uint64_t a, uint64_t b)
+static uint64_t axp_ins (int f, uint64_t a, uint64_t b, uint64_t bm)
 {
-	return axp_bop (f, a, b, 1, 1);
+	return axp_bop (f, a, b, bm, 1, 1);
 }
 
-static uint64_t axp_ext (int f, uint64_t a, uint64_t b)
+static uint64_t axp_ext (int f, uint64_t a, uint64_t b, uint64_t bm)
 {
-	return axp_bop (f, a, b, 0, 1);
+	return axp_bop (f, a, b, bm, 0, 1);
 }
 
 static uint64_t axp_shift (int f, uint64_t a, uint64_t b, uint64_t c)
 {
+	int g = f & ~0x40;
+
 	switch (f & 0x0f) {
 	case 0x00:  return axp_zap (   a,  b);
 	case 0x01:  return axp_zap (   a, ~b);
@@ -141,35 +147,35 @@ static uint64_t axp_shift (int f, uint64_t a, uint64_t b, uint64_t c)
 	}
 
 	switch (f & 0x4f) {
-	case 0x04:  return axp_sr  (f, a,  b);		/* 00    */  // srl
-	case 0x05:  return axp_sr  (f, a, ~b + 1);	/* 11 -b */  // sll.high
-	case 0x06:  return axp_ext (f, a,  b);		/* 00    */
-	case 0x07:  return axp_ins (f, a, ~b + 1);	/* 11 -b */
+	case 0x04:  return axp_sr  (f, a,  b    );		// srl
+	case 0x05:  return axp_sr  (f, a, -b    );		// sll.high
+	case 0x06:  return axp_ext (f, a,  b    ,  b    );
+	case 0x07:  return axp_ins (f, a, -b    , -b    );
 
-	case 0x08:  return axp_sr  (f, a, ~b + 1);	/* 11 -b */  // srl.frac
-	case 0x09:  return axp_sr  (f, a,  b);		/* 00    */  // sll
-	case 0x0a:  return axp_ext (f, a, ~b + 1);	/* 11 -b */
-	case 0x0b:  return axp_ins (f, a,  b);		/* 00    */
+	case 0x08:  return axp_sr  (f, a,  b    );		// srl.frac
+	case 0x09:  return axp_sr  (f, a, -b    );		// sll
+	case 0x0a:  return axp_ext (f, a,  b    , -b    );
+	case 0x0b:  return axp_ins (f, a, -b    ,  b    );
 
-	case 0x0c:  return axp_sr  (f, a,  b);		/* 00    */
-	case 0x0d:  return axp_sr  (f, a, ~b + 1);	/* 11 -b */
-	case 0x0e:  return axp_ext (f, a,  b);		/* 00    */
-//	case 0x0f:
+	case 0x0c:  return axp_sr  (f, a,  b    );
+	case 0x0d:  return axp_sr  (f, a, -b    );
+	case 0x0e:  return axp_ext (f, a,  b    ,  b    );
+	case 0x0f:  return axp_ins (f, a, -b    ,  b    );
 
-	case 0x44:  return axp_sr  (f, a,  b + 1);	/* 01    */
-	case 0x45:  return axp_sr  (f, a, ~b + 1);	/* 11 -b */
-//	case 0x46:  return axp_ext (f, a, ~b + 1);	/* 11 -b */  // wrong mask
-	case 0x47:  return axp_ins (f, a,  b);		/* 00    */
+	case 0x44:  return axp_sr  (f, a,  b + 1);
+	case 0x45:  return axp_sr  (f, a, -b    );
+//	case 0x46:  return axp_ext (f, a,  b    ,  b    );	// wrong mask: as for 0x36
+	case 0x47:  return axp_ins (f, a, -b    ,  b    );
 
-	case 0x48:  return axp_sr  (f, a, ~b + 1);	/* 11 -b */
-	case 0x49:  return axp_sr  (f, a,  b + 1);	/* 01    */
-	case 0x4a:  return axp_ext (f, a,  b);		/* 00    */
-//	case 0x4b:  return axp_ins (f, a, ~b + 1);	/* 11 -b */  // wrong mask
+	case 0x48:  return axp_sr  (f, a,  b    );
+	case 0x49:  return axp_sr  (f, a, ~b    );
+	case 0x4a:  return axp_ext (f, a,  b    ,  b    );
+	case 0x4b:  return axp_ins (g, a, -b    ,  b    );	// mask as for 0x0b
 
-	case 0x4c:  return axp_sr  (f, a,  b);		/* 00    */  // sra
-	case 0x4d:  return axp_sr  (f, a, ~b);		/* 10    */
-//	case 0x4e:
-//	case 0x4f:
+	case 0x4c:  return axp_sr  (f, a,  b);			// sra
+	case 0x4d:  return axp_sr  (f, a, ~b);
+	case 0x4e:  return axp_ext (f, a,  b    ,  b    );
+	case 0x4f:  return axp_ins (g, a, -b    ,  b    );	// mask as for 0x0f, but 7F broken
 	}
 
 	return c;
