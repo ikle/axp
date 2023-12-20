@@ -162,18 +162,18 @@ static uint64_t axp_shift (int f, uint64_t a, uint64_t b, uint64_t c)
 
 	case 0x44:  return axp_sr  (f, a,  b + 1);
 	case 0x45:  return axp_sr  (f, a, -b    );
-//	case 0x46:  return axp_ext (f, a,  b    ,  b    );	// wrong mask: as for 0x36
+//	case 0x46:  return axp_ext (f, a,  b    ,  b    );	// wrong mask: as for 0x3x
 	case 0x47:  return axp_ins (f, a, -b    ,  b    );
 
 	case 0x48:  return axp_sr  (f, a,  b    );
 	case 0x49:  return axp_sr  (f, a, ~b    );
 	case 0x4a:  return axp_ext (f, a,  b    ,  b    );
-	case 0x4b:  return axp_ins (f, a, -b    ,  b    );	// mask as for 0x0b
+	case 0x4b:  return axp_ins (f, a, -b    ,  b    );
 
 	case 0x4c:  return axp_sr  (f, a,  b);			// sra
 	case 0x4d:  return axp_sr  (f, a, ~b);
 	case 0x4e:  return axp_ext (f, a,  b    ,  b    );
-	case 0x4f:  return axp_ins (f, a, -b    ,  b    );	// mask as for 0x0f, but 7F broken
+	case 0x4f:  return axp_ins (f, a, -b    ,  b    );	// 7F broken
 	}
 
 	return c;
