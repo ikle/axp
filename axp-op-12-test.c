@@ -109,11 +109,12 @@ static inline uint64_t axp_ins_pm (int f, uint64_t a, uint64_t b)
 }
 
 static
-uint64_t axp_bop (int f, uint64_t a, uint64_t b, uint64_t bm, int y, int z)
+uint64_t axp_bop (int f, uint64_t a, uint64_t b, uint64_t bm, int x, int y, int z)
 {
 	unsigned m  = axp_byte_mask (f);
-//	unsigned sm = (f & 0x48) == 0x40 ? m >> (-bm & 7) : m << (bm & 7);
-	unsigned sm = (f & 0x48) == 0x40 ? m << (bm & 7) >> 8 : m << (bm & 7);
+	unsigned mn = x ? m ^ 0x00ff : m;  /* invert whole 8-bit mask */
+//	unsigned sm = (f & 0x48) == 0x40 ? mn >> (-bm & 7) : mn << (bm & 7);
+	unsigned sm = (f & 0x48) == 0x40 ? mn << (bm & 7) >> 8 : mn << (bm & 7);
 	uint64_t as = axp_sr (f, a, (f & 2) ? b * 8 : b);
 
 	unsigned ms = y ? sm : m;
@@ -123,26 +124,17 @@ uint64_t axp_bop (int f, uint64_t a, uint64_t b, uint64_t bm, int y, int z)
 
 static inline uint64_t axp_msk (int f, uint64_t a, uint64_t b)
 {
-	return axp_bop (f, a, b, b, 1, 0);
-}
-
-static inline uint64_t axp_msk_1 (int f, uint64_t a, uint64_t b, int x, int y)
-{
-	unsigned m  = axp_byte_mask (f);
-	unsigned mn = x ? m ^ 0x00ff : m;  /* invert whole 8-bit mask */
-	unsigned sm = (f & 0x48) == 0x40 ? mn << (b & 7) >> 8 : mn << (b & 7);
-
-	return axp_zap (a, y ? ~sm : sm);
+	return axp_bop (f, a, b, b, f & 1, 1, f & 1);
 }
 
 static inline uint64_t axp_ins (int f, uint64_t a, uint64_t b, uint64_t bm)
 {
-	return axp_bop (f, a, b, bm, 1, 1);
+	return axp_bop (f, a, b, bm, 0, 1, 1);
 }
 
 static inline uint64_t axp_ext (int f, uint64_t a, uint64_t b, uint64_t bm)
 {
-	return axp_bop (f, a, b, bm, 0, 1);
+	return axp_bop (f, a, b, bm, 0, 0, 1);
 }
 
 static uint64_t axp_shift (int f, uint64_t a, uint64_t b, uint64_t c)
@@ -150,8 +142,8 @@ static uint64_t axp_shift (int f, uint64_t a, uint64_t b, uint64_t c)
 	switch (f & 0x0f) {
 	case 0x00:  return axp_zap (   a,  b);
 	case 0x01:  return axp_zap (   a, ~b);
-	case 0x02:  return axp_msk_1 (f, a,  b, 0, 0);
-	case 0x03:  return axp_msk_1 (f, a,  b, 1, 1);
+	case 0x02:  return axp_msk (f, a,  b);
+	case 0x03:  return axp_msk (f, a,  b);
 	}
 
 	switch (f & 0x4f) {
