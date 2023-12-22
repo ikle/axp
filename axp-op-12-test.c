@@ -126,13 +126,13 @@ static inline uint64_t axp_msk (int f, uint64_t a, uint64_t b)
 	return axp_bop (f, a, b, b, 1, 0);
 }
 
-static inline uint64_t axp_msk_1 (int f, uint64_t a, uint64_t b)
+static inline uint64_t axp_msk_1 (int f, uint64_t a, uint64_t b, int x, int y)
 {
 	unsigned m  = axp_byte_mask (f);
-	unsigned mn = (f & 1) ? m ^ 0x00ff : m;
+	unsigned mn = x ? m ^ 0x00ff : m;  /* invert whole 8-bit mask */
 	unsigned sm = (f & 0x48) == 0x40 ? mn << (b & 7) >> 8 : mn << (b & 7);
 
-	return axp_zap (a, (f & 1) ? ~sm : sm);
+	return axp_zap (a, y ? ~sm : sm);
 }
 
 static inline uint64_t axp_ins (int f, uint64_t a, uint64_t b, uint64_t bm)
@@ -150,8 +150,8 @@ static uint64_t axp_shift (int f, uint64_t a, uint64_t b, uint64_t c)
 	switch (f & 0x0f) {
 	case 0x00:  return axp_zap (   a,  b);
 	case 0x01:  return axp_zap (   a, ~b);
-	case 0x02:  return axp_msk_1 (f, a,  b);
-	case 0x03:  return axp_msk_1 (f, a,  b);
+	case 0x02:  return axp_msk_1 (f, a,  b, 0, 0);
+	case 0x03:  return axp_msk_1 (f, a,  b, 1, 1);
 	}
 
 	switch (f & 0x4f) {
