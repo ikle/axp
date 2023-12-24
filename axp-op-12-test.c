@@ -139,7 +139,7 @@ static inline uint64_t axp_mei (int f, uint64_t a, uint64_t b, uint64_t bm)
 	const uint64_t as = axp_sr (f, a, F1 ? b * 8 : b);
 	const unsigned ms = axp_ms (f, bm, x, y, z);
 
-	return axp_zap (as, ms);
+	return axp_zap (as, F1 ? ms : 0);
 }
 
 static uint64_t axp_shift (int f, uint64_t a, uint64_t b, uint64_t c)
