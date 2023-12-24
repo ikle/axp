@@ -121,17 +121,17 @@ uint64_t axp_bop (int f, uint64_t a, uint64_t b, uint64_t bm, int y, int inv)
 	return axp_zap (as, inv ? ~ms : ms);
 }
 
-static uint64_t axp_msk (int f, uint64_t a, uint64_t b)
+static inline uint64_t axp_msk (int f, uint64_t a, uint64_t b)
 {
 	return axp_bop (f, a, b, b, 1, 0);
 }
 
-static uint64_t axp_ins (int f, uint64_t a, uint64_t b, uint64_t bm)
+static inline uint64_t axp_ins (int f, uint64_t a, uint64_t b, uint64_t bm)
 {
 	return axp_bop (f, a, b, bm, 1, 1);
 }
 
-static uint64_t axp_ext (int f, uint64_t a, uint64_t b, uint64_t bm)
+static inline uint64_t axp_ext (int f, uint64_t a, uint64_t b, uint64_t bm)
 {
 	return axp_bop (f, a, b, bm, 0, 1);
 }
