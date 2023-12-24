@@ -93,6 +93,16 @@ uint64_t axp_ext_0 (int f, uint64_t a, uint64_t b)
 	return axp_zap (as, ~m);
 }
 
+#define F(x)	((f >> (x)) & 1)
+
+#define F0	F (0)
+#define F1	F (1)
+#define F2	F (2)
+#define F3	F (3)
+#define F4	F (4)
+#define F5	F (5)
+#define F6	F (6)
+
 static inline uint64_t axp_sr (int f, uint64_t a, uint64_t b)
 {
 	switch (f & 0x0c) {
@@ -115,7 +125,7 @@ uint64_t axp_bop (int f, uint64_t a, uint64_t b, uint64_t bm, int x, int y, int 
 	unsigned mn = x ? m ^ 0x00ff : m;  /* invert whole 8-bit mask */
 //	unsigned sm = (f & 0x48) == 0x40 ? mn >> (-bm & 7) : mn << (bm & 7);
 	unsigned sm = (f & 0x48) == 0x40 ? mn << (bm & 7) >> 8 : mn << (bm & 7);
-	uint64_t as = axp_sr (f, a, (f & 2) ? b * 8 : b);
+	uint64_t as = axp_sr (f, a, F1 ? b * 8 : b);
 
 	unsigned ms = y ? sm : m;  // zap ? bm : m;
 
@@ -124,13 +134,13 @@ uint64_t axp_bop (int f, uint64_t a, uint64_t b, uint64_t bm, int x, int y, int 
 
 static inline uint64_t axp_msk (int f, uint64_t a, uint64_t b)
 {
-	int x = f & 1;
+	int x = F0;
 	return axp_bop (f, a, b, b, x, 1, x);
 }
 
 static inline uint64_t axp_ei (int f, uint64_t a, uint64_t b, uint64_t bm)
 {
-	int y = f & 1;
+	int y = F0;
 	return axp_bop (f, a, b, bm, 0, y, 1);
 }
 
