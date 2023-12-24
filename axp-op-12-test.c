@@ -112,7 +112,7 @@ static
 uint64_t axp_bop (int f, uint64_t a, uint64_t b, uint64_t bm, int y, int inv)
 {
 	unsigned m  = axp_byte_mask (f);
-	unsigned sm = (f & 0x40) ? m >> (-bm & 7) : m << (bm & 7);
+	unsigned sm = (f & 0x48) == 0x40 ? m >> (-bm & 7) : m << (bm & 7);
 	uint64_t as = axp_sr (f, a, b * 8);
 
 	unsigned ms = y ? sm : m;
@@ -137,8 +137,6 @@ static uint64_t axp_ext (int f, uint64_t a, uint64_t b, uint64_t bm)
 
 static uint64_t axp_shift (int f, uint64_t a, uint64_t b, uint64_t c)
 {
-	int g = f & ~0x40;
-
 	switch (f & 0x0f) {
 	case 0x00:  return axp_zap (   a,  b);
 	case 0x01:  return axp_zap (   a, ~b);
@@ -170,12 +168,12 @@ static uint64_t axp_shift (int f, uint64_t a, uint64_t b, uint64_t c)
 	case 0x48:  return axp_sr  (f, a,  b    );
 	case 0x49:  return axp_sr  (f, a, ~b    );
 	case 0x4a:  return axp_ext (f, a,  b    ,  b    );
-	case 0x4b:  return axp_ins (g, a, -b    ,  b    );	// mask as for 0x0b
+	case 0x4b:  return axp_ins (f, a, -b    ,  b    );	// mask as for 0x0b
 
 	case 0x4c:  return axp_sr  (f, a,  b);			// sra
 	case 0x4d:  return axp_sr  (f, a, ~b);
 	case 0x4e:  return axp_ext (f, a,  b    ,  b    );
-	case 0x4f:  return axp_ins (g, a, -b    ,  b    );	// mask as for 0x0f, but 7F broken
+	case 0x4f:  return axp_ins (f, a, -b    ,  b    );	// mask as for 0x0f, but 7F broken
 	}
 
 	return c;
