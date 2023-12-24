@@ -112,7 +112,8 @@ static
 uint64_t axp_bop (int f, uint64_t a, uint64_t b, uint64_t bm, int y, int inv)
 {
 	unsigned m  = axp_byte_mask (f);
-	unsigned sm = (f & 0x48) == 0x40 ? m >> (-bm & 7) : m << (bm & 7);
+//	unsigned sm = (f & 0x48) == 0x40 ? m >> (-bm & 7) : m << (bm & 7);
+	unsigned sm = (f & 0x48) == 0x40 ? m << (bm & 7) >> 8 : m << (bm & 7);
 	uint64_t as = axp_sr (f, a, b * 8);
 
 	unsigned ms = y ? sm : m;
