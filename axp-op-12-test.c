@@ -117,7 +117,7 @@ uint64_t axp_bop (int f, uint64_t a, uint64_t b, uint64_t bm, int x, int y, int 
 	unsigned sm = (f & 0x48) == 0x40 ? mn << (bm & 7) >> 8 : mn << (bm & 7);
 	uint64_t as = axp_sr (f, a, (f & 2) ? b * 8 : b);
 
-	unsigned ms = y ? sm : m;
+	unsigned ms = y ? sm : m;  // zap ? bm : m;
 
 	return axp_zap (as, z ? ~ms : ms);
 }
