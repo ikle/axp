@@ -118,12 +118,12 @@ static inline uint64_t axp_ins_pm (int f, uint64_t a, uint64_t b)
 	return axp_sr (f, axp_zap (a, ~axp_byte_mask (f)), b * 8);
 }
 
-static uint64_t axp_ms (int f, uint64_t bm, int x, int y, int z)
+static uint64_t axp_ms (int f, uint64_t bm, int h, int x, int y, int z)
 {
 	unsigned m  = axp_byte_mask (f);
 	unsigned mn = x ? m ^ 0x00ff : m;  /* invert whole 8-bit mask */
-//	unsigned sm = (f & 0x48) == 0x40 ? mn >> (-bm & 7) : mn << (bm & 7);
-	unsigned sm = (f & 0x48) == 0x40 ? mn << (bm & 7) >> 8 : mn << (bm & 7);
+//	unsigned sm = h ? mn >> (-bm & 7) : mn << (bm & 7);
+	unsigned sm = h ? mn << (bm & 7) >> 8 : mn << (bm & 7);
 	unsigned ms = y ? sm : m;  // zap ? bm : m;
 
 	return z ? ~ms : ms;
@@ -131,13 +131,14 @@ static uint64_t axp_ms (int f, uint64_t bm, int x, int y, int z)
 
 static inline uint64_t axp_mei (int f, uint64_t a, uint64_t b, uint64_t bm)
 {
+	const int h = F6 & !F3;
 	const int s = F2 | F3;
 	const int x = F0 & !s;
 	const int y = F0 | !s;
 	const int z = F0 |  s;
 
 	const uint64_t as = axp_sr (f, a, F1 ? b * 8 : b);
-	const unsigned ms = axp_ms (f, bm, x, y, z);
+	const unsigned ms = axp_ms (f, bm, h, x, y, z);
 
 	return axp_zap (as, F1 ? ms : 0);
 }
