@@ -1,7 +1,7 @@
 /*
  * AXP Operations
  *
- * Copyright (c) 2021-2022 Alexei A. Smekalkine <ikle@ikle.ru>
+ * Copyright (c) 2021-2024 Alexei A. Smekalkine <ikle@ikle.ru>
  *
  * SPDX-License-Identifier: BSD-2-Clause
  */
@@ -138,7 +138,7 @@ module axp_branch (
 	wire [5:0] op = cmd[31:26];
 
 	wire lbc  = op[3] ? ~a[0] : 1;			/* 08 - lbc/abs	*/
-	wire eq   = op[0] ? ~|a, lbc;			/* 01 - eq/lbc	*/
+	wire eq   = op[0] ? ~|a : lbc;			/* 01 - eq/lbc	*/
 	wire le   = op[1] & a[63] | eq;			/* 02 - lt	*/
 	wire cond = op[2] ? ~le : le;			/* 04 - invert	*/
 
