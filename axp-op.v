@@ -137,7 +137,7 @@ module axp_branch (
 );
 	wire [5:0] op = cmd[31:26];
 
-	wire lbc  = op[3] ? ~a[0] : 1;			/* 08 - lbc/abs	*/
+	wire lbc  = op[3] ? ~a[0] : ~0;			/* 08 - lbc/abs	*/
 	wire eq   = op[0] ? ~|a : lbc;			/* 01 - eq/lbc	*/
 	wire le   = op[1] & a[63] | eq;			/* 02 - lt	*/
 	wire cond = op[2] ? ~le : le;			/* 04 - invert	*/
