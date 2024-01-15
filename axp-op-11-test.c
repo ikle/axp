@@ -40,11 +40,9 @@ static inline uint64_t axp_logic (int f, uint64_t a, uint64_t b, uint64_t c)
 	const uint64_t amask = 1;			/* bwx		*/
 	const uint64_t impl  = 1;			/* 21164*	*/
 
-	const int lbs = F4;				/* 10 - lbs	*/
-	const int eq  = F5;				/* 20 - eq	*/
-	const int lt  = F6;				/* 40 - lt	*/
-	const int inv = F1 & (F2 | !F4);
-	const int cond = axp_cond (lbs, eq, lt, inv, a);
+							/* 10 - lbs	*/
+	const int inv = F1 & (F2 | !F4);		/* 20 - eq	*/
+	const int cond = axp_cond (F4, F5, F6, inv, a);	/* 40 - lt	*/
 
 	uint64_t bb  = F3 ? ~b : b;			/* 08 - invert	*/
 
