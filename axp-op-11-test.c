@@ -28,6 +28,11 @@ static inline int axp_cond (int lbs, int eq, int lt, int inv, uint64_t a)
 	return inv ^ c;
 }
 
+static inline uint64_t axp_bitop (int xor, int or, uint64_t a, uint64_t b)
+{
+	return xor ? (a ^ b) : or ? (a | b) : (a & b);
+}
+
 /* opcode 11, bitwise operations and conditional move */
 
 static inline uint64_t axp_logic (int f, uint64_t a, uint64_t b, uint64_t c)
@@ -43,8 +48,9 @@ static inline uint64_t axp_logic (int f, uint64_t a, uint64_t b, uint64_t c)
 
 	uint64_t bb  = F3 ? ~b : b;			/* 08 - invert	*/
 
-	uint64_t bitop = F6 ? a ^ bb :			/* 40 - xor	*/
-			 F5 ? a | bb : a & bb;		/* 20 - or	*/
+	const int xor = F6;				/* 40 - xor	*/
+	const int or  = F5;				/* 20 - or	*/
+	const uint64_t bitop = axp_bitop (xor, or, a, bb);
 
 	int cmov = F2 | F1;				/* 02/04 - cmov	*/
 
