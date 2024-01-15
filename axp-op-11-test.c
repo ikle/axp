@@ -43,11 +43,10 @@ static inline uint64_t axp_logic (int f, uint64_t a, uint64_t b, uint64_t c)
 	const int lbs = F4;				/* 10 - lbs	*/
 	const int eq  = F5;				/* 20 - eq	*/
 	const int lt  = F6;				/* 40 - lt	*/
-
-	int inv  = F1 & (F2 | !F4);
-	int cmov = F2 | F1;				/* 02/04 - cmov	*/
-
+	const int inv = F1 & (F2 | !F4);
 	const int cond = axp_cond (lbs, eq, lt, inv, a);
+
+	int cmov = F2 | F1;				/* 02/04 - cmov	*/
 
 	uint64_t r  = cmov ? b : bitop;
 	uint64_t rm = (f & 0x61) == 0x61 ? r & ~amask : r;
