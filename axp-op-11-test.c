@@ -48,13 +48,12 @@ static inline uint64_t axp_logic (int f, uint64_t a, uint64_t b, uint64_t c)
 
 	uint64_t bb  = F3 ? ~b : b;			/* 08 - invert	*/
 
-	const int xor = F6;				/* 40 - xor	*/
-	const int or  = F5;				/* 20 - or	*/
-	const uint64_t bitop = axp_bitop (xor, or, a, bb);
+							/* 40 - xor	*/
+	const uint64_t bop = axp_bitop (F6, F5, a, bb);	/* 20 - or	*/
 
 	int cmov = F2 | F1;				/* 02/04 - cmov	*/
 
-	uint64_t r  = cmov ? b : bitop;
+	uint64_t r  = cmov ? b : bop;
 	uint64_t rm = (f & 0x61) == 0x61 ? r & ~amask : r;
 	uint64_t cb = F3 ? impl : c;			/* 08 - implver	*/
 
