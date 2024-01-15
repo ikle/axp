@@ -44,8 +44,7 @@ static inline uint64_t axp_logic (int f, uint64_t a, uint64_t b, uint64_t c)
 	const int inv = F1 & (F2 | !F4);		/* 20 - eq	*/
 	const int cond = axp_cond (F4, F5, F6, inv, a);	/* 40 - lt	*/
 
-	uint64_t bb  = F3 ? ~b : b;			/* 08 - invert	*/
-
+	const uint64_t bb = F3 ? ~b : b;		/* 08 - invert	*/
 							/* 40 - xor	*/
 	const uint64_t bop = axp_bitop (F6, F5, a, bb);	/* 20 - or	*/
 
