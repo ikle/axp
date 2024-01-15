@@ -9,6 +9,16 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#define F(x)	((f >> (x)) & 1)
+
+#define F0	F (0)
+#define F1	F (1)
+#define F2	F (2)
+#define F3	F (3)
+#define F4	F (4)
+#define F5	F (5)
+#define F6	F (6)
+
 static inline int axp_cond (int lbs, int eq, int lt, int inv, uint64_t a)
 {
 	const int e = eq & (a == 0);
@@ -25,23 +35,23 @@ static inline uint64_t axp_logic (int f, uint64_t a, uint64_t b, uint64_t c)
 	const uint64_t amask = 1;			/* bwx		*/
 	const uint64_t impl  = 1;			/* 21164*	*/
 
-	uint64_t bb  = (f & 0x08) ? ~b : b;		/* 08 - invert	*/
+	uint64_t bb  = F3 ? ~b : b;			/* 08 - invert	*/
 
-	uint64_t bitop = (f & 0x40) ? a ^ bb :		/* 40 - xor	*/
-			 (f & 0x20) ? a | bb : a & bb;	/* 20 - or	*/
+	uint64_t bitop = F6 ? a ^ bb :			/* 40 - xor	*/
+			 F5 ? a | bb : a & bb;		/* 20 - or	*/
 
-	const int lbs = (f & 0x10) != 0;		/* 10 - lbs	*/
-	const int eq  = (f & 0x20) != 0;		/* 20 - eq	*/
-	const int lt  = (f & 0x40) != 0;		/* 40 - lt	*/
+	const int lbs = F4;				/* 10 - lbs	*/
+	const int eq  = F5;				/* 20 - eq	*/
+	const int lt  = F6;				/* 40 - lt	*/
 
-	int inv  = (f & 2) && ((f & 4) || !(f & 0x10));
-	int cmov = (f & 4) || (f & 2);			/* 02/04 - cmov	*/
+	int inv  = F1 & (F2 | !F4);
+	int cmov = F2 | F1;				/* 02/04 - cmov	*/
 
 	const int cond = axp_cond (lbs, eq, lt, inv, a) || !cmov;
 
 	uint64_t r  = cmov ? b : bitop;
 	uint64_t rm = (f & 0x61) == 0x61 ? r & ~amask : r;
-	uint64_t cb = (f & 0x08) ? impl : c;		/* 08 - implver	*/
+	uint64_t cb = F3 ? impl : c;			/* 08 - implver	*/
 
 	return cond ? rm : cb;
 }
