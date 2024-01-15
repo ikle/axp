@@ -19,13 +19,13 @@
 #define F5	F (5)
 #define F6	F (6)
 
-static inline int axp_cond (int lbs, int eq, int lt, int inv, uint64_t a)
+static inline int axp_cond (int lbs, int eq, int lt, int neg, uint64_t a)
 {
 	const int e = eq & (a == 0);
 	const int l = lt & ((a >> 63) & 1);
 	const int c = lbs ? (a & 1) : (e | l);
 
-	return inv ^ c;
+	return neg ^ c;
 }
 
 static inline uint64_t axp_bitop (int xor, int or, uint64_t a, uint64_t b)
@@ -41,8 +41,8 @@ static inline uint64_t axp_logic (int f, uint64_t a, uint64_t b, uint64_t c)
 	const uint64_t impl  = 1;			/* 21164*	*/
 
 							/* 10 - lbs	*/
-	const int inv = F1 & (F2 | !F4);		/* 20 - eq	*/
-	const int cond = axp_cond (F4, F5, F6, inv, a);	/* 40 - lt	*/
+	const int neg = F1 & (F2 | !F4);		/* 20 - eq	*/
+	const int cond = axp_cond (F4, F5, F6, neg, a);	/* 40 - lt	*/
 
 	const uint64_t bb = F3 ? ~b : b;		/* 08 - invert	*/
 							/* 40 - xor	*/
