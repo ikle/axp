@@ -158,40 +158,40 @@ static uint64_t axp_shift (int f, uint64_t a, uint64_t b, uint64_t c)
 	switch (f & 0x0f) {
 	case 0x00:  return axp_mei (f, a, dc    ,  b    );	// zap
 	case 0x01:  return axp_mei (f, a, dc    , ~b    );	// zapnot
-	case 0x02:  return axp_mei (f, a,  b    ,  b    );
-	case 0x03:  return axp_mei (f, a,  b    ,  b    );
+	case 0x02:  return axp_mei (f, a,  b    ,  b    );	// msk
+	case 0x03:  return axp_mei (f, a,  b    ,  b    );	// -
 	}
 
 	switch (f & 0x4f) {
 	case 0x04:  return axp_mei (f, a,  b    , dc    );	// srl
 	case 0x05:  return axp_mei (f, a, -b    , dc    );	// sll.high
 	case 0x06:  return axp_mei (f, a,  b    ,  b    );	// extl
-	case 0x07:  return axp_mei (f, a, -b    , -b    );
+	case 0x07:  return axp_mei (f, a, -b    , -b    );	// -
 
 	case 0x08:  return axp_mei (f, a,  b    , dc    );	// srl.frac
 	case 0x09:  return axp_mei (f, a, -b    , dc    );	// sll
-	case 0x0a:  return axp_mei (f, a,  b    , -b    );
+	case 0x0a:  return axp_mei (f, a,  b    , -b    );	// -
 	case 0x0b:  return axp_mei (f, a, -b    ,  b    );	// insl
 
 	case 0x0c:  return axp_mei (f, a,  b    , dc    );	// sra
 	case 0x0d:  return axp_mei (f, a, -b    , dc    );	// sra.frac = srl.frac
-	case 0x0e:  return axp_mei (f, a,  b    ,  b    );
-	case 0x0f:  return axp_mei (f, a, -b    ,  b    );
+	case 0x0e:  return axp_mei (f, a,  b    ,  b    );	// -
+	case 0x0f:  return axp_mei (f, a, -b    ,  b    );	// -
 
-	case 0x44:  return axp_mei (f, a,  b + 1, dc    );
-	case 0x45:  return axp_mei (f, a, -b    , dc    );
-//	case 0x46:  return axp_mei (f, a,  b    ,  b    );	// wrong mask
+	case 0x44:  return axp_mei (f, a,  b + 1, dc    );	// -
+	case 0x45:  return axp_mei (f, a, -b    , dc    );	// -
+//	case 0x46:  return axp_mei (f, a,  b    ,  b    );	// -, wrong mask
 	case 0x47:  return axp_mei (f, a, -b    ,  b    );	// insh
 
-	case 0x48:  return axp_mei (f, a,  b    , dc    );
-	case 0x49:  return axp_mei (f, a, ~b    , dc    );
+	case 0x48:  return axp_mei (f, a,  b    , dc    );	// -
+	case 0x49:  return axp_mei (f, a, ~b    , dc    );	// -
 	case 0x4a:  return axp_mei (f, a,  b    ,  b    );	// exth
-	case 0x4b:  return axp_mei (f, a, -b    ,  b    );
+	case 0x4b:  return axp_mei (f, a, -b    ,  b    );	// -
 
-	case 0x4c:  return axp_mei (f, a,  b    , dc    );
-	case 0x4d:  return axp_mei (f, a, ~b    , dc    );
-	case 0x4e:  return axp_mei (f, a,  b    ,  b    );
-	case 0x4f:  return axp_mei (f, a, -b    ,  b    );	// 7F broken, mask = 0
+	case 0x4c:  return axp_mei (f, a,  b    , dc    );	// -
+	case 0x4d:  return axp_mei (f, a, ~b    , dc    );	// -
+	case 0x4e:  return axp_mei (f, a,  b    ,  b    );	// -
+	case 0x4f:  return axp_mei (f, a, -b    ,  b    );	// -, 7F broken, mask = 0
 	}
 
 	return c;
