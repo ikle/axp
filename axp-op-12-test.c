@@ -130,9 +130,8 @@ static uint64_t axp_ms (int f, uint64_t bm, int h, int x, int y, int z)
 {
 	unsigned m  = axp_byte_mask (f);
 	unsigned mn = x ? m ^ 0x00ff : m;  /* invert whole 8-bit mask */
-//	unsigned sm = h ? mn >> (-bm & 7) : mn << (bm & 7);
 	unsigned sm = h ? mn << (bm & 7) >> 8 : mn << (bm & 7);
-	unsigned ms = y ? sm : m;  // zap ? bm : m;
+	unsigned ms = y ? sm : m;
 
 	return z ? ~ms : ms;
 }
