@@ -127,11 +127,11 @@ static uint64_t axp_ms (int f, uint64_t bm, int h, int x, int y, int z)
 
 static inline uint64_t axp_mei (int f, uint64_t a, uint64_t bs, uint64_t bm)
 {
-	const int h = F6 & !F3;
-	const int s = F2 | F3;
-	const int x = F0 & !s;
-	const int y = F0 | !s;
-	const int z = F0 |  s;
+	const int h = F6 & !F3;		/* select high mask		*/
+	const int s = F2 | F3;		/* shift A			*/
+	const int x = F0 & !s;		/* preinvert byte mask		*/
+	const int y = F0 | !s;		/* shift byte mask		*/
+	const int z = F0 |  s;		/* postinvert byte mask		*/
 
 	const uint64_t as = axp_sr (f, a, F1 ? bs * 8 : bs);
 	const unsigned ms = axp_ms (f, bm, h, x, y, z);
