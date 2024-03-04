@@ -38,6 +38,10 @@ static uint64_t axp_zap (uint64_t x, unsigned mask)
 
 static unsigned axp_byte_mask (int f)
 {
+	switch (f & 0x4f) {
+	case 0x46:  return 0x00ff;	// WTF?
+	}
+
 	switch (f & 0x30) {
 	case 0x00:  return 0x0001;
 	case 0x10:  return 0x0003;
@@ -179,7 +183,7 @@ static uint64_t axp_shift (int f, uint64_t a, uint64_t b, uint64_t c)
 
 	case 0x44:  return axp_mei (f, a,  b + 1, dc    );	// -
 	case 0x45:  return axp_mei (f, a, -b    , dc    );	// -
-//	case 0x46:  return axp_mei (f, a,  b    ,  b    );	// -, wrong mask
+	case 0x46:  return axp_mei (f, a,  b    ,  b    );	// -
 	case 0x47:  return axp_mei (f, a, -b    ,  b    );	// insh
 
 	case 0x48:  return axp_mei (f, a,  b    , dc    );	// -
