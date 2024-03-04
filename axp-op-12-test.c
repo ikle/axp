@@ -100,19 +100,18 @@ static inline uint64_t axp_srn (int h, int l, int s, uint64_t a, uint64_t b)
 	return ah << (-b & 63) | al >> (b & 63);
 }
 
-static inline uint64_t axp_sr (int f, uint64_t a, uint64_t b)
+static inline uint64_t axp_sr (int f, uint64_t a, uint64_t b, int pass)
 {
-	const int p = !(F2 | F3);	/* pass A	*/
 	const int l = F2;		/* use Al = A	*/
 	const int h = F3;		/* use Ah = A	*/
 	const int s = F2 & F3;		/* sign extend	*/
 
-	return p ? a : axp_srn (h, l, s, a, b);
+	return pass ? a : axp_srn (h, l, s, a, b);
 }
 
 static inline uint64_t axp_ins_pm (int f, uint64_t a, uint64_t b)
 {
-	return axp_sr (f, axp_zap (a, ~axp_byte_mask (f)), b * 8);
+	return axp_sr (f, axp_zap (a, ~axp_byte_mask (f)), b * 8, 0);
 }
 
 static uint64_t axp_ms (int f, uint64_t bm, int x, int h, int y, int z)
@@ -133,7 +132,7 @@ static inline uint64_t axp_mei (int f, uint64_t a, uint64_t bs, uint64_t bm)
 	const int y = F0 | !s;		/* shift byte mask		*/
 	const int z = F0 |  s;		/* postinvert byte mask		*/
 
-	const uint64_t as = axp_sr (f, a, F1 ? bs * 8 : bs);
+	const uint64_t as = axp_sr (f, a, F1 ? bs * 8 : bs, !s);
 	const unsigned ms = axp_ms (f, bm, x, h, y, z);
 
 	return axp_zap (as, F1 ? ms : s ? 0 : F0 ? ~bm : bm);
