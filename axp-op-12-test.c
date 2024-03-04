@@ -158,8 +158,8 @@ static uint64_t axp_shift (int f, uint64_t a, uint64_t b, uint64_t c)
 	switch (f & 0x0f) {
 	case 0x00:  return axp_mei (f, a, dc    ,  b    );	// zap
 	case 0x01:  return axp_mei (f, a, dc    , ~b    );	// zapnot
-	case 0x02:  return axp_mei (f, a,  b    ,  b);
-	case 0x03:  return axp_mei (f, a,  b    ,  b);
+	case 0x02:  return axp_mei (f, a,  b    ,  b    );
+	case 0x03:  return axp_mei (f, a,  b    ,  b    );
 	}
 
 	switch (f & 0x4f) {
