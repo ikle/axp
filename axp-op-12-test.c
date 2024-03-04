@@ -115,7 +115,7 @@ static inline uint64_t axp_ins_pm (int f, uint64_t a, uint64_t b)
 	return axp_sr (f, axp_zap (a, ~axp_byte_mask (f)), b * 8);
 }
 
-static uint64_t axp_ms (int f, uint64_t bm, int h, int x, int y, int z)
+static uint64_t axp_ms (int f, uint64_t bm, int x, int h, int y, int z)
 {
 	unsigned m  = axp_byte_mask (f);
 	unsigned mn = x ? m ^ 0x00ff : m;  /* invert whole 8-bit mask */
@@ -127,14 +127,14 @@ static uint64_t axp_ms (int f, uint64_t bm, int h, int x, int y, int z)
 
 static inline uint64_t axp_mei (int f, uint64_t a, uint64_t bs, uint64_t bm)
 {
-	const int h = F6 & !F3;		/* select high mask		*/
 	const int s = F2 | F3;		/* shift A			*/
 	const int x = F0 & !s;		/* preinvert byte mask		*/
+	const int h = F6 & !F3;		/* select high mask		*/
 	const int y = F0 | !s;		/* shift byte mask		*/
 	const int z = F0 |  s;		/* postinvert byte mask		*/
 
 	const uint64_t as = axp_sr (f, a, F1 ? bs * 8 : bs);
-	const unsigned ms = axp_ms (f, bm, h, x, y, z);
+	const unsigned ms = axp_ms (f, bm, x, h, y, z);
 
 	return axp_zap (as, F1 ? ms : s ? 0 : F0 ? ~bm : bm);
 }
