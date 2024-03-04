@@ -137,7 +137,7 @@ static uint64_t axp_ms (int f, uint64_t bm, int h, int x, int y, int z)
 	return z ? ~ms : ms;
 }
 
-static inline uint64_t axp_mei (int f, uint64_t a, uint64_t b, uint64_t bm)
+static inline uint64_t axp_mei (int f, uint64_t a, uint64_t bs, uint64_t bm)
 {
 	const int h = F6 & !F3;
 	const int s = F2 | F3;
@@ -145,7 +145,7 @@ static inline uint64_t axp_mei (int f, uint64_t a, uint64_t b, uint64_t bm)
 	const int y = F0 | !s;
 	const int z = F0 |  s;
 
-	const uint64_t as = axp_sr (f, a, F1 ? b * 8 : b);
+	const uint64_t as = axp_sr (f, a, F1 ? bs * 8 : bs);
 	const unsigned ms = axp_ms (f, bm, h, x, y, z);
 
 	return axp_zap (as, F1 ? ms : bm);
