@@ -148,7 +148,7 @@ static inline uint64_t axp_mei (int f, uint64_t a, uint64_t bs, uint64_t bm)
 	const uint64_t as = axp_sr (f, a, F1 ? bs * 8 : bs);
 	const unsigned ms = axp_ms (f, bm, h, x, y, z);
 
-	return axp_zap (as, F1 ? ms : bm);
+	return axp_zap (as, F1 ? ms : s ? 0 : bm);
 }
 
 static uint64_t axp_shift (int f, uint64_t a, uint64_t b, uint64_t c)
@@ -163,33 +163,33 @@ static uint64_t axp_shift (int f, uint64_t a, uint64_t b, uint64_t c)
 	}
 
 	switch (f & 0x4f) {
-	case 0x04:  return axp_mei (f, a,  b    ,  0    );	// srl
-	case 0x05:  return axp_mei (f, a, -b    ,  0    );	// sll.high
+	case 0x04:  return axp_mei (f, a,  b    , dc    );	// srl
+	case 0x05:  return axp_mei (f, a, -b    , dc    );	// sll.high
 	case 0x06:  return axp_mei (f, a,  b    ,  b    );	// extl
 	case 0x07:  return axp_mei (f, a, -b    , -b    );
 
-	case 0x08:  return axp_mei (f, a,  b    ,  0    );	// srl.frac
-	case 0x09:  return axp_mei (f, a, -b    ,  0    );	// sll
+	case 0x08:  return axp_mei (f, a,  b    , dc    );	// srl.frac
+	case 0x09:  return axp_mei (f, a, -b    , dc    );	// sll
 	case 0x0a:  return axp_mei (f, a,  b    , -b    );
 	case 0x0b:  return axp_mei (f, a, -b    ,  b    );	// insl
 
-	case 0x0c:  return axp_mei (f, a,  b    ,  0    );	// sra
-	case 0x0d:  return axp_mei (f, a, -b    ,  0    );	// sra.frac = srl.frac
+	case 0x0c:  return axp_mei (f, a,  b    , dc    );	// sra
+	case 0x0d:  return axp_mei (f, a, -b    , dc    );	// sra.frac = srl.frac
 	case 0x0e:  return axp_mei (f, a,  b    ,  b    );
 	case 0x0f:  return axp_mei (f, a, -b    ,  b    );
 
-	case 0x44:  return axp_mei (f, a,  b + 1,  0    );
-	case 0x45:  return axp_mei (f, a, -b    ,  0    );
+	case 0x44:  return axp_mei (f, a,  b + 1, dc    );
+	case 0x45:  return axp_mei (f, a, -b    , dc    );
 //	case 0x46:  return axp_mei (f, a,  b    ,  b    );	// wrong mask
 	case 0x47:  return axp_mei (f, a, -b    ,  b    );	// insh
 
-	case 0x48:  return axp_mei (f, a,  b    ,  0    );
-	case 0x49:  return axp_mei (f, a, ~b    ,  0    );
+	case 0x48:  return axp_mei (f, a,  b    , dc    );
+	case 0x49:  return axp_mei (f, a, ~b    , dc    );
 	case 0x4a:  return axp_mei (f, a,  b    ,  b    );	// exth
 	case 0x4b:  return axp_mei (f, a, -b    ,  b    );
 
-	case 0x4c:  return axp_mei (f, a,  b    ,  0    );
-	case 0x4d:  return axp_mei (f, a, ~b    ,  0    );
+	case 0x4c:  return axp_mei (f, a,  b    , dc    );
+	case 0x4d:  return axp_mei (f, a, ~b    , dc    );
 	case 0x4e:  return axp_mei (f, a,  b    ,  b    );
 	case 0x4f:  return axp_mei (f, a, -b    ,  b    );	// 7F broken, mask = 0
 	}
