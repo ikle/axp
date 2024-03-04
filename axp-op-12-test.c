@@ -136,7 +136,7 @@ static inline uint64_t axp_mei (int f, uint64_t a, uint64_t bs, uint64_t bm)
 	const uint64_t as = axp_sr (f, a, F1 ? bs * 8 : bs);
 	const unsigned ms = axp_ms (f, bm, h, x, y, z);
 
-	return axp_zap (as, F1 ? ms : s ? 0 : bm);
+	return axp_zap (as, F1 ? ms : s ? 0 : F0 ? ~bm : bm);
 }
 
 static uint64_t axp_shift (int f, uint64_t a, uint64_t b, uint64_t c)
@@ -145,7 +145,7 @@ static uint64_t axp_shift (int f, uint64_t a, uint64_t b, uint64_t c)
 
 	switch (f & 0x0f) {
 	case 0x00:  return axp_mei (f, a, dc    ,  b    );	// zap
-	case 0x01:  return axp_mei (f, a, dc    , ~b    );	// zapnot
+	case 0x01:  return axp_mei (f, a, dc    ,  b    );	// zapnot
 	case 0x02:  return axp_mei (f, a,  b    ,  b    );	// msk
 	case 0x03:  return axp_mei (f, a,  b    ,  b    );	// -
 	}
