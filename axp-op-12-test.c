@@ -9,21 +9,6 @@
 #include <stdint.h>
 #include <stdio.h>
 
-static inline uint64_t axp_srl (uint64_t a, uint64_t b)
-{
-	return a >> (b & 63);
-}
-
-static inline uint64_t axp_sll (uint64_t a, uint64_t b)
-{
-	return a << (b & 63);
-}
-
-static inline uint64_t axp_sra (int64_t a, uint64_t b)
-{
-	return a >> (b & 63);
-}
-
 static uint64_t axp_zap (uint64_t x, unsigned mask)
 {
 	uint64_t m, bm;
@@ -112,7 +97,7 @@ static inline uint64_t axp_srn (int h, int l, int s, uint64_t a, uint64_t b)
 	const uint64_t al = l ? a : 0;
 	const uint64_t ah = s ? (int64_t) a >> 63 : h ? a : 0;
 
-	return axp_sll (ah, -b) | axp_srl (al, b);
+	return ah << (-b & 63) | al >> (b & 63);
 }
 
 static inline uint64_t axp_sr (int f, uint64_t a, uint64_t b)
