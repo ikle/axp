@@ -1,7 +1,7 @@
 /*
  * AXP opcode 12 test
  *
- * Copyright (c) 2021-2022 Alexei A. Smekalkine <ikle@ikle.ru>
+ * Copyright (c) 2021-2024 Alexei A. Smekalkine <ikle@ikle.ru>
  *
  * SPDX-License-Identifier: BSD-2-Clause
  */
@@ -103,14 +103,21 @@ uint64_t axp_ext_0 (int f, uint64_t a, uint64_t b)
 #define F5	F (5)
 #define F6	F (6)
 
+static inline uint64_t axp_srn (int h, int l, int s, uint64_t a, uint64_t b)
+{
+	const uint64_t al = l ? a : 0;
+	const uint64_t ah = s ? (int64_t) a << 63 >> 63 : h ? a : 0;
+
+	return axp_sll (ah, -b) | axp_srl (al, b);
+}
+
 static inline uint64_t axp_sr (int f, uint64_t a, uint64_t b)
 {
-	switch (f & 0x0c) {
-	case 0x00:  return a;
-	case 0x04:  return axp_srl (a,  b);
-	case 0x08:  return axp_sll (a, -b);  /* srl/sra overflow word */
-	default:    return axp_sra (a,  b);
-	}
+	const int l = F2;
+	const int h = F3;
+	const int s = F2 & F3;
+
+	return (f & 0x0c) == 0 ? a : axp_srn (h, l, s, a, b);
 }
 
 static inline uint64_t axp_ins_pm (int f, uint64_t a, uint64_t b)
