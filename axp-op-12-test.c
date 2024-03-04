@@ -97,7 +97,7 @@ static inline uint64_t axp_srn (int h, int l, int s, uint64_t a, uint64_t b)
 	const uint64_t al = l ? a : 0;
 	const uint64_t ah = s ? (int64_t) a >> 63 : h ? a : 0;
 
-	return ah << (-b & 63) | al >> (b & 63);
+	return ah << (-b & 63) | al >> (b & 63);  /* 128-bit right shift */
 }
 
 static inline uint64_t axp_sr (int f, uint64_t a, uint64_t b, int pass)
