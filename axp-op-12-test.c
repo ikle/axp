@@ -113,11 +113,12 @@ static inline uint64_t axp_srn (int h, int l, int s, uint64_t a, uint64_t b)
 
 static inline uint64_t axp_sr (int f, uint64_t a, uint64_t b)
 {
+	const int p = !(F2 | F3);	/* pass A	*/
 	const int l = F2;
 	const int h = F3;
 	const int s = F2 & F3;
 
-	return (f & 0x0c) == 0 ? a : axp_srn (h, l, s, a, b);
+	return p ? a : axp_srn (h, l, s, a, b);
 }
 
 static inline uint64_t axp_ins_pm (int f, uint64_t a, uint64_t b)
