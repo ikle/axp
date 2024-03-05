@@ -127,7 +127,7 @@ static uint8_t axp_ms (int f, uint64_t b, int p)
 	uint8_t  mx = y ?  ms : m;
 	uint8_t  mi = z ? ~mx : mx;
 
-	return mi;
+	return F1 ? mi : !p ? 0 : F0 ? ~b : b;
 }
 
 static inline uint64_t axp_mei (int f, uint64_t a, uint64_t bs, uint64_t bm)
@@ -137,7 +137,7 @@ static inline uint64_t axp_mei (int f, uint64_t a, uint64_t bs, uint64_t bm)
 	const uint64_t as = axp_sr (f, a, F1 ? bs * 8 : bs, p);
 	const uint8_t  ms = axp_ms (f, bm, p);
 
-	return axp_zap (as, F1 ? ms : !p ? 0 : F0 ? ~bm : bm);
+	return axp_zap (as, ms);
 }
 
 static uint64_t axp_shift (int f, uint64_t a, uint64_t b, uint64_t c)
