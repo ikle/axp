@@ -125,9 +125,9 @@ static uint8_t axp_ms (int f, uint64_t b, int p)
 	uint16_t mn = x ? m ^ 0x00ff : m;  /* invert whole 8-bit mask */
 	uint8_t  ms = h ? mn << (b & 7) >> 8 : mn << (b & 7);
 	uint8_t  mx = y ?  ms : m;
-	uint8_t  mi = z ? ~mx : mx;
+	uint8_t  my = F1 ? mx : p ? b : ~0;
 
-	return F1 ? mi : !p ? 0 : F0 ? ~b : b;
+	return z ? ~my : my;
 }
 
 static inline uint64_t axp_mei (int f, uint64_t a, uint64_t bs, uint64_t bm)
