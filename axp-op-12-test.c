@@ -92,7 +92,7 @@ uint64_t axp_ext_0 (int f, uint64_t a, uint64_t b)
 #define F5	F (5)
 #define F6	F (6)
 
-static inline uint64_t axp_srn (int h, int l, int s, uint64_t a, uint64_t b)
+static inline uint64_t axp_srn (int h, int l, int s, uint64_t a, int b)
 {
 	const uint64_t al = l ? a : 0;
 	const uint64_t ah = s ? (int64_t) a >> 63 : h ? a : 0;
