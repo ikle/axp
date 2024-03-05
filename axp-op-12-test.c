@@ -140,7 +140,7 @@ static inline uint64_t axp_mei (int f, uint64_t a, uint64_t bs, uint64_t bm)
 	return axp_zap (as, ms);
 }
 
-static uint64_t axp_shift (int f, uint64_t a, uint64_t b, uint64_t c)
+static uint64_t axp_shift (int f, uint64_t a, uint64_t b)
 {
 	const int dc = b;  /* don't care */
 
@@ -183,7 +183,7 @@ static uint64_t axp_shift (int f, uint64_t a, uint64_t b, uint64_t c)
 	case 0x4f:  return axp_mei (f, a, -b    ,  b    );	// -, 7F broken, mask = 0
 	}
 
-	return c;
+	return 0;
 }
 
 int main (int argc, char *argv[])
@@ -195,7 +195,7 @@ int main (int argc, char *argv[])
 	printf ("# a = %016lx, b = %ld\n\n", a, b);
 
 	for (op = 0; op < 0x80; ++op)
-		printf ("%2X %016lx\n", op, axp_shift (op, a, b, 0));
+		printf ("%2X %016lx\n", op, axp_shift (op, a, b));
 
 	return 0;
 }
