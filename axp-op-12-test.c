@@ -116,15 +116,15 @@ static inline uint64_t axp_ins_pm (int f, uint64_t a, uint64_t b)
 
 static uint8_t axp_ms (int f, uint64_t b, int p)
 {
-	const int x = F0 &  p;		/* preinvert byte mask		*/
+	const int n = F0 &  p;		/* preinvert byte mask		*/
 	const int h = F6 & !F3;		/* select high mask		*/
-	const int y = F0 |  p;		/* shift byte mask		*/
+	const int s = F0 |  p;		/* shift byte mask		*/
 	const int z = F0 | !p;		/* postinvert byte mask		*/
 
 	uint16_t m  = axp_byte_mask (f);
-	uint16_t mn = x  ? m ^ 0x00ff : m;  /* invert whole 8-bit mask */
+	uint16_t mn = n  ? m ^ 0x00ff : m;  /* invert whole 8-bit mask */
 	uint8_t  mh = h  ? mn << (b & 7) >> 8 : mn << (b & 7);
-	uint8_t  ms = y  ? mh : m;
+	uint8_t  ms = s  ? mh : m;
 	uint8_t  mx = F1 ? ms : p ? b : ~0;
 
 	return z ? ~mx : mx;
