@@ -106,7 +106,9 @@ static inline uint64_t axp_sr (int f, uint64_t a, uint64_t b, int pass)
 	const int h = F3;		/* use Ah = A	*/
 	const int s = F2 & F3;		/* sign extend	*/
 
-	return pass ? a : axp_srn (h, l, s, a, b);
+	const int bs = F1 ? b * 8 : b;
+
+	return pass ? a : axp_srn (h, l, s, a, bs);
 }
 
 static inline uint64_t axp_ins_pm (int f, uint64_t a, uint64_t b)
@@ -135,7 +137,7 @@ static inline uint64_t axp_mei (int f, uint64_t a, uint64_t bs, uint64_t bm)
 {
 	const int p = !(F2 | F3);	/* pass A (zap/msk block)	*/
 
-	const uint64_t as = axp_sr (f, a, F1 ? bs * 8 : bs, p);
+	const uint64_t as = axp_sr (f, a, bs, p);
 	const uint8_t  ms = axp_ms (f, bm, p);
 
 	return axp_zap (as, ms);
