@@ -92,10 +92,10 @@ uint64_t axp_ext_0 (int f, uint64_t a, uint64_t b)
 #define F5	F (5)
 #define F6	F (6)
 
-static inline uint64_t axp_srn (int h, int l, int s, uint64_t a, int b, int ci)
+static inline uint64_t axp_srn (int s, int h, int l, uint64_t a, int b, int ci)
 {
-	const uint64_t al = l ? a : 0;
 	const uint64_t ah = s ? (int64_t) a >> 63 : h ? a : 0;
+	const uint64_t al = l ? a : 0;
 
 	const int bs = b + ci;	/* ci ? b + 1 : b */
 
@@ -104,14 +104,14 @@ static inline uint64_t axp_srn (int h, int l, int s, uint64_t a, int b, int ci)
 
 static inline uint64_t axp_sr (int f, uint64_t a, uint64_t b, int pass)
 {
+	const int s = F2 & F3;		/* sign extend	*/
 	const int l = F2;		/* use Al = A	*/
 	const int h = F3;		/* use Ah = A	*/
-	const int s = F2 & F3;		/* sign extend	*/
 	const int n = F0 & !pass;
 
 	const int bs = F1 ? b * 8 : b;
 
-	return pass ? a : axp_srn (h, l, s, a, n ? ~bs : bs, n);
+	return pass ? a : axp_srn (s, h, l, a, n ? ~bs : bs, n);
 }
 
 static inline uint64_t axp_ins_pm (int f, uint64_t a, uint64_t b)
