@@ -105,9 +105,9 @@ static uint64_t axp_srn (int s, int h, int l, uint64_t a, int b, int n, int ci)
 
 static inline uint64_t axp_sr (int f, uint64_t a, uint64_t b, int pass)
 {
-	const int s = F2 & F3;		/* sign extend	*/
-	const int l = F2;		/* use Al = A	*/
-	const int h = F3;		/* use Ah = A	*/
+	const int s = F2 & F3;		/* sign extend			*/
+	const int l = F2;		/* use Al = A			*/
+	const int h = F3;		/* use Ah = A			*/
 	const int n = F0 & !pass;
 
 	const int bs = F1 ? b * 8 : b;
