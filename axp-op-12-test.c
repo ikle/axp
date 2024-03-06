@@ -108,11 +108,12 @@ static inline uint64_t axp_sr (int f, uint64_t a, uint64_t b, int pass)
 	const int s = F2 & F3;		/* sign extend			*/
 	const int l = F2;		/* use Al = A			*/
 	const int h = F3;		/* use Ah = A			*/
-	const int n = F0 & !pass;
+	const int n = F0 & !pass;	/* negate B			*/
+	const int i = n;		/* increment B			*/
 
 	const int bs = F1 ? b * 8 : b;
 
-	return pass ? a : axp_srn (s, h, l, a, bs, n, n);
+	return pass ? a : axp_srn (s, h, l, a, bs, n, i);
 }
 
 static inline uint64_t axp_ins_pm (int f, uint64_t a, uint64_t b)
