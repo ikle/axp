@@ -100,7 +100,7 @@ static uint64_t axp_srn (int s, int h, int l, uint64_t a, int b, int n, int ci)
 	const int bn = n ? ~b : b;
 	const int bs = bn + ci;	/* ci ? b + 1 : b */
 
-	return ah << (-bs & 63) | al >> (bs & 63);  /* 128-bit right shift */
+	return ah << (-bs & 63) | al >> (bs & 63);  /* 127-bit right shift */
 }
 
 static inline uint64_t axp_sr (int f, uint64_t a, uint64_t b, int pass)
